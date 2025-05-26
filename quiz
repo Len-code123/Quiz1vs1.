@@ -1,0 +1,157 @@
+// QuizApp mit 5 Kategorien, Schwierigkeitsgraden, 10 Fragen pro Runde (5 normal + 5 Schätzfragen)
+// Dunkles Design, "Created by Lennart" unten
+
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+
+const categories = ['Allgemein', 'Sport', 'Wissenschaft', 'Geschichte', 'Kunst'];
+const difficulties = ['Einfach', 'Mittel', 'Schwer'];
+
+// Echte Fragen mit Antwortmöglichkeiten
+const sampleQuestions = {
+  normal: [
+    {
+      question: 'Was ist die Hauptstadt von Frankreich?',
+      options: ['Paris', 'London', 'Berlin', 'Rom'],
+      answer: 'Paris'
+    },
+    {
+      question: 'Wie viele Kontinente gibt es?',
+      options: ['5', '6', '7', '8'],
+      answer: '7'
+    },
+    {
+      question: 'Wie heißt der höchste Berg der Welt?',
+      options: ['K2', 'Mont Blanc', 'Mount Everest', 'Zugspitze'],
+      answer: 'Mount Everest'
+    },
+    {
+      question: 'Welcher Planet ist der Sonne am nächsten?',
+      options: ['Mars', 'Merkur', 'Venus', 'Erde'],
+      answer: 'Merkur'
+    },
+    {
+      question: 'Welches Tier ist das größte an Land lebende Säugetier?',
+      options: ['Elefant', 'Giraffe', 'Nilpferd', 'Nashorn'],
+      answer: 'Elefant'
+    }
+  ],
+  estimate: [
+    {
+      question: 'Wie viele Meter hoch ist der Eiffelturm?',
+      options: ['300', '330', '360', '390'],
+      answer: '330'
+    },
+    {
+      question: 'Wie viele Zähne hat ein Erwachsener?',
+      options: ['28', '30', '32', '34'],
+      answer: '32'
+    },
+    {
+      question: 'Wie viele Minuten dauert ein Fußballspiel (regulär)?',
+      options: ['60', '90', '100', '120'],
+      answer: '90'
+    },
+    {
+      question: 'Wie viele Farben hat ein Regenbogen?',
+      options: ['5', '6', '7', '8'],
+      answer: '7'
+    },
+    {
+      question: 'Wie viele Bundesländer hat Deutschland?',
+      options: ['14', '15', '16', '17'],
+      answer: '16'
+    }
+  ]
+};
+
+export default function QuizApp() {
+  const [category, setCategory] = useState('');
+  const [difficulty, setDifficulty] = useState('');
+  const [started, setStarted] = useState(false);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [selectedOption, setSelectedOption] = useState('');
+
+  const questions = [
+    ...sampleQuestions.normal.slice(0, 5),
+    ...sampleQuestions.estimate.slice(0, 5),
+  ];
+
+  const currentQuestion = questions[questionIndex];
+
+  const handleStart = () => {
+    if (category && difficulty) setStarted(true);
+  };
+
+  const handleSubmit = () => {
+    if (selectedOption === currentQuestion.answer) {
+      setScore(score + 1);
+    }
+    setSelectedOption('');
+    if (questionIndex < 9) setQuestionIndex(questionIndex + 1);
+  };
+
+  return (
+    <div className="min-h-screen bg-black text-white p-4 flex flex-col items-center">
+      {!started ? (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <h1 className="text-3xl font-bold mb-4">Quiz starten</h1>
+          <div className="mb-4">
+            <label>Kategorie:</label>
+            <select
+              className="bg-gray-800 p-2 rounded ml-2"
+              onChange={(e) => setCategory(e.target.value)}>
+              <option value="">Bitte wählen</option>
+              {categories.map((cat) => (
+                <option key={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-4">
+            <label>Schwierigkeit:</label>
+            <select
+              className="bg-gray-800 p-2 rounded ml-2"
+              onChange={(e) => setDifficulty(e.target.value)}>
+              <option value="">Bitte wählen</option>
+              {difficulties.map((diff) => (
+                <option key={diff}>{diff}</option>
+              ))}
+            </select>
+          </div>
+          <Button onClick={handleStart}>Start</Button>
+        </motion.div>
+      ) : questionIndex < 10 ? (
+        <Card className="w-full max-w-xl bg-gray-900 mt-10">
+          <CardContent className="p-6">
+            <h2 className="text-xl mb-4">Frage {questionIndex + 1}:</h2>
+            <p className="mb-4">{currentQuestion.question}</p>
+            <div className="grid gap-2">
+              {currentQuestion.options.map((option, idx) => (
+                <label key={idx} className="block bg-gray-700 p-2 rounded cursor-pointer">
+                  <input
+                    type="radio"
+                    name="option"
+                    value={option}
+                    checked={selectedOption === option}
+                    onChange={() => setSelectedOption(option)}
+                    className="mr-2"
+                  />
+                  {option}
+                </label>
+              ))}
+            </div>
+            <Button onClick={handleSubmit} className="mt-4">Antworten</Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="mt-10">
+          <h2 className="text-2xl">Dein Ergebnis: {score} von 10</h2>
+        </div>
+      )}
+      <footer className="mt-auto text-sm text-gray-400 absolute bottom-2 right-2">Created by Lennart</footer>
+    </div>
+  );
+}
